@@ -6,7 +6,7 @@ Once again, the most important thing on this site is not the layout, but the use
 
 Thanks for your attention!
 
-===========================================================================================
+===========================================================================
 
 # Getting Started with Create React App
 
