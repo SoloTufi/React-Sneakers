@@ -1,6 +1,29 @@
-import Card from "./components/card";
+import Card from "./components/Card";
 import Drawer from "./components/drawer";
 import Header from "./components/header";
+
+const cardData = [
+  {
+    title: "Мужские Кроссовки Nike Blazer Mid Suede",
+    price: 12999,
+    imageUrl: "/img/sneakers/1.jpg"
+  },
+  {
+    title: "Мужские Кроссовки Nike Air Max 270",
+    price: 15632,
+    imageUrl: "/img/sneakers/2.jpg"
+  },
+  {
+    title: "Мужские Кроссовки Nike Blazer Mid Suede",
+    price: 12999,
+    imageUrl: "/img/sneakers/3.jpg"
+  },
+  {
+    title: "Мужские Кроссовки Nike Air Max 270",
+    price: 15632,
+    imageUrl: "/img/sneakers/4.jpg"
+  }
+]
 
 function App() {
   return (
@@ -16,10 +39,12 @@ function App() {
           </div>
         </div>
         <div className="d-flex justify-between">
-          <Card />
-          <Card />
-          <Card />
-          <Card />
+          {cardData.map((obj) => (
+            <Card
+              title={obj.title}
+              price={obj.price}
+              imageUrl={obj.imageUrl} />
+          ))}
         </div>
       </div>
     </div>

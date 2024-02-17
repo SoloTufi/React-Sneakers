@@ -1,12 +1,17 @@
-function Card() {
+import styles from "./card.module.scss";
+
+function Card(props) {
   return (
-    <div className="card">
-      <img src="/img/sneakers/4.jpg" alt="sneakers" width={133} height={112} />
-      <h5>Кроссовки Puma X Aka Boku Future Rider</h5>
+    <div className={styles.card}>
+      <div className={styles.favorite}>
+        <img src="/img/heartUnliked.svg" alt="Favorite" />
+      </div>
+      <img src={props.imageUrl} alt="sneakers" width={133} height={112} />
+      <h5>{props.title}</h5>
       <div className="d-flex justify-between align-center">
         <div className="d-flex flex-column">
           <span>Цена:</span>
-          <b>12 999 руб.</b>
+          <b>{props.price} руб.</b>
         </div>
         <button className="button">
           <svg
