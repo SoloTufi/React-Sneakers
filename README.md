@@ -1,3 +1,13 @@
+### `Description of the project called React Sneakers`
+
+This site was created to improve your skills exclusively in the development of React applications. There is a basic layout layout and nothing more about the layout. The site is not adapted for different devices.
+
+Once again, the most important thing on this site is not the layout, but the use of React Hooks and other React and JavaScript technologies, working with the API and a small conditional backend.
+
+Thanks for your attention!
+
+===========================================================================================
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
