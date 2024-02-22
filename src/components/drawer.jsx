@@ -1,9 +1,9 @@
-export const Drawer = ({ onClose, onRemove, items = [] }) => {
+function Drawer({ onClose, onRemove, items = [] }) {
   return (
     <div className="overlay">
       <div className="drawer">
         <h2 className="d-flex justify-between mb-30">
-          Корзина
+          Корзина{" "}
           <img
             onClick={onClose}
             className="cu-p"
@@ -13,10 +13,13 @@ export const Drawer = ({ onClose, onRemove, items = [] }) => {
         </h2>
 
         {items.length > 0 ? (
-          <div>
+          <>
             <div className="items">
               {items.map((obj) => (
-                <div className="cartItem d-flex align-center mb-20">
+                <div
+                  key={obj.id}
+                  className="cartItem d-flex align-center mb-20"
+                >
                   <div
                     style={{ backgroundImage: `url(${obj.imageUrl})` }}
                     className="cartItemImg"
@@ -52,7 +55,7 @@ export const Drawer = ({ onClose, onRemove, items = [] }) => {
                 Оформить заказ <img src="/img/arrow.svg" alt="Arrow" />
               </button>
             </div>
-          </div>
+          </>
         ) : (
           <div className="cartEmpty d-flex align-center justify-center flex-column flex">
             <img
@@ -75,4 +78,6 @@ export const Drawer = ({ onClose, onRemove, items = [] }) => {
       </div>
     </div>
   );
-};
+}
+
+export default Drawer;

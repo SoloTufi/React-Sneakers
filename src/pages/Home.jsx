@@ -1,14 +1,36 @@
 import React from "react";
-import Card from "../components/Card";
+import Card from "../components/Card/card";
+import AppContext from "../helpers/context";
 
-export const Home = ({
+function Home({
   items,
+  cartItems,
   searchValue,
+  setSearchValue,
   onChangeSearchInput,
-  onAddToCart,
-  onClearSearchInput,
   onAddToFavorite,
-}) => {
+  onAddToCart,
+  isLoading,
+}) {
+  const { isItemAdded } = React.useContext(AppContext);
+
+  const renderItems = () => {
+    const filtredItems = items.filter((item) =>
+      item.title.toLowerCase().includes(searchValue.toLowerCase())
+    );
+
+    return (isLoading ? [...Array(10)] : filtredItems).map((item, index) => (
+      <Card
+        key={index}
+        onFavorite={(obj) => onAddToFavorite(obj)}
+        onPlus={(obj) => onAddToCart(obj)}
+        added={isItemAdded(item && item.id)}
+        loading={isLoading}
+        {...item}
+      />
+    ));
+  };
+
   return (
     <div className="content p-40">
       <div className="d-flex align-center justify-between mb-40">
@@ -19,10 +41,10 @@ export const Home = ({
           <img src="/img/searchIcon.svg" alt="Search" />
           {searchValue && (
             <img
-              src="/img/btn-remove.svg"
-              alt="Remove"
+              onClick={() => setSearchValue("")}
               className="clear cu-p"
-              onClick={onClearSearchInput}
+              src="/img/btn-remove.svg"
+              alt="Clear"
             />
           )}
           <input
@@ -32,22 +54,10 @@ export const Home = ({
           />
         </div>
       </div>
-      <div className="d-flex flex-wrap">
-        {items
-          .filter((item) =>
-            item.title.toLowerCase().includes(searchValue.toLowerCase())
-          )
-          .map((item) => (
-            <Card
-              key={item.id}
-              title={item.title}
-              price={item.price}
-              imageUrl={item.imageUrl}
-              onFavorite={(obj) => onAddToFavorite(obj)}
-              onPlus={(obj) => onAddToCart(obj)}
-            />
-          ))}
-      </div>
+
+      <div className="d-flex flex-wrap">{renderItems()}</div>
     </div>
   );
-};
+}
+
+export default Home;

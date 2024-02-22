@@ -1,106 +1,105 @@
 import React from 'react';
-
-import axios from 'axios';
 import { Route, Routes } from 'react-router-dom';
-import { Drawer } from "./components/drawer";
-import { Header } from "./components/header";
-import { Home } from './pages/Home';
-import { Favorites } from './pages/Favorites';
+import axios from 'axios';
+import AppContext from './helpers/context';
+import Header from './components/header';
+import Drawer from './components/drawer';
+import Home from './pages/Home';
+import Favorites from './pages/Favorites';
 
 function App() {
-  //items и cartItems - хранят массивы объектов с данными о товарах и добавленных в корзину товарах соответственно
   const [items, setItems] = React.useState([]);
   const [cartItems, setCartItems] = React.useState([]);
-
   const [favorites, setFavorites] = React.useState([]);
-
-  //searchValue - хранит строку с текущим значением поиска
+  const [isLoading, setIsLoading] = React.useState(true);
   const [searchValue, setSearchValue] = React.useState('');
-  //cartOpened - хранит булево значение, отображает открыта ли корзина
   const [cartOpened, setCartOpened] = React.useState(false);
 
-  //Hook useEffect - выполняет асинхронный запрос на сервер для получения данных о товарах с помощью метода fetch. 
-  //После получения данных, они преобразуются в формат JSON и установятся в состояние items
   React.useEffect(() => {
-    //res - ответ сервера
-    axios.get('https://87cbc8bfb5e8e5dc.mokky.dev/items').then((res) => {
-      setItems(res.data);
-      console.log(res.data);
-    })
-    axios.get('https://87cbc8bfb5e8e5dc.mokky.dev/cart').then((res) => {
-      setCartItems(res.data);
-    })
-    axios.get('https://87cbc8bfb5e8e5dc.mokky.dev/favorites').then((res) => {
-      setFavorites(res.data);
-      console.log(res.data);
-    })
-  }, []);
+    async function fetchData() {
+      const cartResponse = await axios.get('https://87cbc8bfb5e8e5dc.mokky.dev/cart');
+      const itemsResponse = await axios.get('https://87cbc8bfb5e8e5dc.mokky.dev/items');
+      const favoritesResponse = await axios.get('https://87cbc8bfb5e8e5dc.mokky.dev/favorites');
 
-  //onAddToCart - добавляет объект товара в массив cartItems с помощью функции setCartItems, используя оператор расширения массива
-  const onAddToCart = (obj) => {
-    axios.post('https://87cbc8bfb5e8e5dc.mokky.dev/cart', obj);
-    setCartItems((prev) => [...prev, obj]);
-    console.log(obj);
-  }
+      setIsLoading(false);
 
-  //onRemoveItem - удаляет объект из массива cartItems используя фильтрацию по id
-  const onRemoveItem = (id) => {
-    axios.delete(`https://87cbc8bfb5e8e5dc.mokky.dev/cart/${id}`);
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
-  }
-
-  const onAddToFavorite = (obj) => {
-    if (favorites.find(obj => obj.id === obj.id)) {
-      axios.delete(`https://87cbc8bfb5e8e5dc.mokky.dev/favorites/${obj.id}`);
-      setFavorites((prev) => prev.filter((item) => item.id !== obj.id));
-    } else {
-      axios.post('https://87cbc8bfb5e8e5dc.mokky.dev/favorites', obj);
-      setFavorites((prev) => [...prev, obj]);
+      setCartItems(cartResponse.data);
+      setFavorites(favoritesResponse.data);
+      setItems(itemsResponse.data);
     }
 
-  }
+    fetchData();
+  }, []);
 
+  const onAddToCart = (obj) => {
+    if (cartItems.find((item) => Number(item.id) === Number(obj.id))) {
+      axios.delete(`https://87cbc8bfb5e8e5dc.mokky.dev/cart/${obj.id}`)
+      setCartItems(prev => prev.filter(item => Number(item.id) !== Number(obj.id)));
+    } else {
+      axios.post('https://87cbc8bfb5e8e5dc.mokky.dev/cart', obj);
+      setCartItems((prev) => [...prev, obj]);
+    }
+  };
 
-  //onChangeSearchInput - обрабатывает событие изменения значения инпута поиска и выводит его в функцию setSearchValue
+  const onRemoveItem = (id) => {
+    axios.delete(`https://87cbc8bfb5e8e5dc.mokky.dev/cart/${id}`);
+    setCartItems((prev) => prev.filter((item) => Number(item.id) !== Number(id)));
+    console.log(id);
+  };
+
+  const onAddToFavorite = async (obj) => {
+    try {
+      if (favorites.find((favObj) => Number(favObj.id) === Number(obj.id))) {
+        axios.delete(`https://87cbc8bfb5e8e5dc.mokky.dev/favorites/${obj.id}`);
+      } else {
+        const { data } = await axios.post('https://87cbc8bfb5e8e5dc.mokky.dev/favorites', obj);
+        setFavorites((prev) => [...prev, data]);
+      }
+    } catch (error) {
+      alert('Не удалось добавить в фавориты');
+    }
+  };
+
   const onChangeSearchInput = (event) => {
     setSearchValue(event.target.value);
-  }
+  };
 
-  //onClearSearchInput - очищает поле инпута, передавая в setSearchValue пустую строку
-  const onClearSearchInput = () => {
-    setSearchValue('');
+  const isItemAdded = (id) => {
+    cartItems.some((obj) => Number(obj.id) === Number(id))
   }
 
   return (
-    <div className="wrapper clear">
+    <AppContext.Provider value={{ items, cartItems, favorites, isItemAdded }}>
+      <div className="wrapper clear">
+        {cartOpened && (
+          <Drawer items={cartItems} onClose={() => setCartOpened(false)} onRemove={onRemoveItem} />
+        )}
 
-      {/*Drawer - компонент для отображения корзины, который будет отображаться только при условии setCartOpened*/}
-      {cartOpened && <Drawer items={cartItems} onClose={() => setCartOpened(false)} onRemove={onRemoveItem} />}
-      {/*Header - компонент для отображения шапки сайта, при клике на который будет открываться корзина*/}
-      <Header onClickCart={() => setCartOpened(true)} />
+        <Header onClickCart={() => setCartOpened(true)} />
 
-      <Routes>
-        <Route path={"/"}
-          element={
-            <Home
-              items={items}
-              searchValue={searchValue}
-              onAddToCart={onAddToCart}
-              setSearchValue={setSearchValue}
-              onAddToFavorite={onAddToFavorite}
-              onClearSearchInput={onClearSearchInput}
-              onChangeSearchInput={onChangeSearchInput}
-            />
-          }>
-        </Route>
-        <Route path={"/favorites"}
-          element={<Favorites items={favorites} onAddToFavorite={onAddToFavorite} />}>
-        </Route>
-      </Routes>
-    </div>
+        <Routes>
+          <Route path={"/"} exact
+            element={
+              <Home
+                items={items}
+                searchValue={searchValue}
+                onAddToCart={onAddToCart}
+                setSearchValue={setSearchValue}
+                onAddToFavorite={onAddToFavorite}
+                cartItems={cartItems}
+                //onClearSearchInput={onClearSearchInput}
+                onChangeSearchInput={onChangeSearchInput}
+                isLoading={isLoading}
+              />
+            }>
+          </Route>
+          <Route path={"/favorites"} exact
+            element={<Favorites onAddToFavorite={onAddToFavorite} />}>
+          </Route>
+        </Routes>
+      </div>
+    </AppContext.Provider>
   );
 }
-
-
 
 export default App;
